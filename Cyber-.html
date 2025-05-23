@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberLibrary - Hacker & Security PDF Collection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;700&display=swap');
+        
+        :root {
+            --primary: #00ff88;
+            --secondary: #00b8ff;
+            --dark: #0a192f;
+            --darker: #020c1b;
+            --light: #ccd6f6;
+            --viewer-bg-dark: #1a2639;
+            --viewer-bg-light: #f5f5f5;
+            --text-dark: #ccd6f6;
+            --text-light: #333;
+        }
+        
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--darker);
+            color: var(--light);
+            overflow-x: hidden;
+            margin: 0;
+            cursor: none;
+        }
+        
+        .title-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .glow {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+        }
+        
+        .glow-secondary {
+            text-shadow: 0 0 10px rgba(0, 184, 255, 0.7);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 30px rgba(0, 255, 136, 0.2);
+        }
+        
+        .pdf-thumbnail {
+            background: linear-gradient(145deg, #0a192f, #020c1b);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .pdf-thumbnail:hover {
+            transform: scale(1.05) rotate(1deg);
+        }
+        
+        .neon-border {
+            position: relative;
+            border: 2px solid transparent;
+        }
+        
+        .neon-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        .scanline {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scanline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            animation: scan 8s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating-delay-1 {
+            animation-delay: 1s;
+        }
+        
+        .floating-delay-2 {
+            animation-delay: 2s;
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid var(--primary);
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary) }
+        }
+        
+        #pdf-container {
+            perspective: 1000px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 70vh;
+            min-height: 400px;
+            min-width: 600px;
+            resize: both;
+            overflow: auto;
+        }
+        
+        #pdf-viewer {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #pdf-viewer canvas {
+            display: block;
+            margin: 0;
+            width: 100%;
+            height: auto;
+        }
+        
+        .page-turn {
+            animation: pageTurn 0.8s ease-out;
+        }
+        
+        @keyframes pageTurn {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(-90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+        
+        .hexagon {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 184, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 184, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .terminal {
+            background: rgba(10, 25, 47, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        .terminal-header {
+            background: linear-gradient(to right, var(--dark), var(--darker));
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        
+        .terminal-body {
+            font-family: 'Roboto Mono', monospace;
+            height: 300px;
+            overflow-y: auto;
+        }
+        
+        .command {
+            color: var(--primary);
+        }
+        
+        .response {
+            color: var(--light);
+        }
+        
+        .cursor {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+        
+        .book-3d {
+            transform-style: preserve-3d;
+            transform: rotateY(-20deg);
+            transition: transform 0.5s ease;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .book-3d:hover {
+            transform: rotateY(-5deg) translateY(-10px);
+        }
+        
+        .book-cover {
+            transform: translateZ(20px);
+            backface-visibility: hidden;
+        }
+        
+        .book-spine {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 20px;
+            background: linear-gradient(to right, #111, #333);
+            transform: rotateY(90deg) translateX(-10px);
+        }
+        
+        .book-pages {
+            position: absolute;
+            right: 0;
+            top: 5%;
+            height: 90%;
+            width: 10px;
+            background: #f5f5f5;
+            transform: translateZ(-10px) rotateY(90deg) translateX(10px);
+        }
+        
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        #pdf-modal {
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        #pdf-container {
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.2);
+            background: var(--viewer-bg-dark);
+            color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        #pdf-container.light-mode {
+            background: var(--viewer-bg-light);
+            color: var(--text-light);
+        }
+
+        #pdf-viewer {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--dark);
+        }
+
+        #pdf-viewer::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #pdf-viewer::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        #pdf-viewer::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .pdf-controls {
+            background: rgba(10, 25, 47, 0.9);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pdf-controls button {
+            background: var(--dark);
+            color: var(--light);
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .pdf-controls button:hover {
+            background: var(--primary);
+            color: var(--darker);
+        }
+
+        .pdf-controls input {
+            background: var(--dark);
+            color: var(--light);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            padding: 5px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .pdf-sidebar {
+            background: rgba(10, 25, 47, 0.9);
+            border-right: 1px solid rgba(0, 255, 136, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+            height: 70vh;
+        }
+
+        .pdf-sidebar h4 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .pdf-sidebar div {
+            color: var(--light);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        .pdf-sidebar div:hover {
+            color: var(--primary);
+        }
+
+        @media (min-width: 768px) {
+            .pdf-sidebar {
+                width: 20%;
+            }
+            .pdf-viewer-container {
+                width: 80%;
+            }
+        }
+
+        #pdf-container:fullscreen {
+            height: 100vh;
+            width: 100vw;
+            background: none;
+            border-radius: 0;
+            box-shadow: none;
+            margin: 0;
+            resize: none;
+        }
+
+        #pdf-container:fullscreen #pdf-viewer {
+            height: calc(100vh - 60px);
+        }
+
+        #pdf-container:fullscreen #pdf-viewer canvas {
+            width: 100vw;
+            height: auto;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--light);
+        }
+
+        .loading-bar {
+            width: 80%;
+            background: var(--dark);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .loading-progress {
+            height: 5px;
+            background: var(--primary);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .bookmark-item button {
+            background: var(--primary);
+            color: var(--darker);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        #custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary);
+            transition: transform 0.1s ease;
+            display: none;
+        }
+
+        #custom-cursor.hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary);
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1.5); }
+            to { transform: scale(1.8); }
+        }
+
+        #cursor-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            display: none;
+        }
+
+        #pdf-viewer:hover ~ #custom-cursor,
+        #pdf-viewer:hover ~ #cursor-canvas {
+            display: none !important;
+        }
+
+        .soundboard {
+            background: rgba(10, 25, 47, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .soundboard h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .soundboard .sound-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .soundboard select {
+            background: var(--dark);
+            color: var(--light);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 8px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 0.9rem;
+        }
+
+        .soundboard button {
+            background: var(--dark);
+            color: var(--light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .soundboard button:hover {
+            background: var(--primary);
+            color: var(--darker);
+        }
+
+        .soundboard button.active {
+            background: var(--primary);
+            color: var(--darker);
+        }
+
+        .soundboard .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .soundboard input[type="range"] {
+            accent-color: var(--primary);
+            width: 100%;
+        }
+
+        .hidden-video {
+            position: absolute;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .book-3d {
+                transform: rotateY(0deg);
+                margin: 20px auto;
+            }
+            
+            .terminal-body {
+                height: 200px;
+            }
+            
+            .typewriter {
+                white-space: normal;
+                border-right: none;
+                animation: none;
+            }
+
+            .pdf-sidebar {
+                height: auto;
+                max-height: 30vh;
+                margin-bottom: 15px;
+            }
+
+            .pdf-controls {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px;
+            }
+
+            .pdf-controls > div {
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+
+            .pdf-controls button {
+                padding: 10px;
+            }
+
+            .pdf-controls input {
+                width: 50px;
+            }
+
+            #pdf-viewer canvas {
+                width: 100%;
+                height: auto;
+            }
+
+            #pdf-container {
+                resize: none;
+                min-height: 300px;
+                min-width: 100%;
+            }
+
+            .soundboard .sound-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .soundboard select {
+                max-width: 100%;
+            }
+
+            .soundboard button {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .soundboard .volume-control {
+                max-width: 100%;
+            }
+
+            body {
+                cursor: auto !important;
+            }
+
+            #custom-cursor,
+            #cursor-canvas {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pdf-sidebar {
+                max-height: 20vh;
+            }
+
+            .pdf-controls button {
+                padding: 8px;
+            }
+
+            .pdf-controls input {
+                width: 50px;
+            }
+
+            #pdf-container {
+                min-height: 250px;
+            }
+
+            .soundboard select {
+                font-size: 0.8rem;
+            }
+
+            .soundboard button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen grid-bg">
+    <div id="custom-cursor"></div>
+    <canvas id="cursor-canvas"></canvas>
+
+    <div id="particles-js"></div>
+    
+    <nav class="bg-black bg-opacity-80 backdrop-filter backdrop-blur-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center">
+                            <i class="fas fa-lock text-2xl text-green-400 mr-2"></i>
+                            <span class="title-font text-xl text-white">Cyber<span class="text-green-400">Library</span></span>
+                        </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#home" class="text-green-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Home</a>
+                            <a href="#library" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Library</a>
+                            <a href="#features" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Features</a>
+                            <a href="#about" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">About</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6">
+                        <div class="relative">
+                            <input type="text" class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-64" placeholder="Search PDFs...">
+                            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-button" class="bg-gray-900 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="text-green-400 block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#library" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Library</a>
+                <a href="#features" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Features</a>
+                <a href="#about" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
+            </div>
+            <div class="pt-4 pb-3 border-t border-gray-700">
+                <div class="px-5">
+                    <input type="text" class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-full" placeholder="Search PDFs...">
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <section id="home" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="title-font text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white">
+                    <span class="glow">Hacker</span> <span class="text-green-400">Resources</span> <span class="glow-secondary">Collection</span>
+                </h1>
+                <p class="text-lg text-gray-300 mb-8 max-w-lg">
+                    Access over <span class="text-green-400 font-bold">100+</span> premium cybersecurity and hacking PDFs in one place. Learn, explore and master the art of digital security.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#library" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/30">
+                        <i class="fas fa-book-open mr-2"></i> Explore Library
+                    </a>
+                    <a href="#features" class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-star mr-2"></i> Features
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="relative w-full max-w-md mx-auto">
+                    <div class="book-3d w-64 h-80 mx-auto relative">
+                        <div class="book-cover w-full h-full bg-gradient-to-br from-green-500 to-blue-600 rounded-lg p-4 flex flex-col justify-between">
+                            <div>
+                                <div class="w-10 h-1 bg-white mb-2"></div>
+                                <div class="w-8 h-1 bg-white mb-2"></div>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="title-font text-white text-xl mb-2">Hacker's</h3>
+                                <h2 class="title-font text-white text-3xl font-bold">Handbook</h2>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-white">CyberLibrary</p>
+                            </div>
+                        </div>
+                        <div class="book-spine"></div>
+                        <div class="book-pages"></div>
+                    </div>
+                    <div class="absolute -top-10 -left-10 w-20 h-20 bg-blue-500 rounded-full opacity-20 floating"></div>
+                    <div class="absolute -bottom-5 -right-5 w-24 h-24 bg-green-500 rounded-full opacity-20 floating floating-delay-1"></div>
+                    <div class="absolute top-1/2 -right-10 w-16 h-16 bg-purple-500 rounded-full opacity-20 floating floating-delay-2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
+                <span class="glow">Advanced</span> <span class="text-green-400">Features</span>
+            </h2>
+            <p class="text-lg text-gray-400 max-w-3xl mx-auto">
+                Our PDF viewer comes packed with powerful tools to enhance your reading experience
+            </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-eye text-2xl text-green-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">3D Page Turning</h3>
+                <p class="text-gray-400">
+                    Experience realistic 3D page turning animations that make reading digital PDFs feel like physical books.
+                </p>
+            </div>
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-search-plus text-2xl text-blue-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Smart Zoom</h3>
+                <p class="text-gray-400">
+                    Pinch-to-zoom or double-tap to zoom into any part of the PDF with crisp, clear rendering.
+                </p>
+            </div>
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-purple-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-bookmark text-2xl text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Bookmarks & Notes</h3>
+                <p class="text-gray-400">
+                    Save your place and add personal notes to any page. All annotations are saved automatically.
+                </p>
+            </div>
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-yellow-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-moon text-2xl text-yellow-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Dark Mode</h3>
+                <p class="text-gray-400">
+                    Read comfortably at night with our eye-friendly dark mode that reduces eye strain.
+                </p>
+            </div>
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-red-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-text-height text-2xl text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Text Reflow</h3>
+                <p class="text-gray-400">
+                    Adjust text size and spacing for optimal readability on any device size.
+                </p>
+            </div>
+            <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
+                <div class="w-14 h-14 bg-pink-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-robot text-2xl text-pink-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">AI Summary</h3>
+                <p class="text-gray-400">
+                    Get AI-generated summaries of complex security concepts to accelerate your learning.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="bg-black bg-opacity-80 rounded-xl overflow-hidden">
+            <div class="terminal">
+                <div class="terminal-header flex items-center px-4 py-3">
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div class="text-center flex-1 text-gray-400 text-sm">
+                        cyberlibrary-terminal -- PDF Search
+                    </div>
+                </div>
+                <div class="terminal-body p-4 font-mono text-sm" id="terminal-body">
+                    <div class="mb-2"><span class="command">user@cyberlibrary:~$</span> search --type=pdf --category="penetration testing"</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="library" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
+                <span class="text-green-400">Explore</span> <span class="glow">Our Collection</span>
+            </h2>
+            <p class="text-lg text-gray-400 max-w-3xl mx-auto">
+                Browse through our extensive collection of cybersecurity and hacking PDF resources
+            </p>
+            <div class="flex flex-wrap justify-center mt-8 gap-4" id="categories-list">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="pdf-grid">
+        </div>
+        <div class="text-center mt-12">
+            <button class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-8 rounded-full transition-all duration-300">
+                <i class="fas fa-sync-alt mr-2"></i> Load More PDFs
+            </button>
+        </div>
+    </section>
+    
+    <div id="pdf-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-black bg-opacity-90"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
+            <div class="inline-block align-bottom bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[90vw] sm:w-full">
+                <div class="bg-gray-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-white" id="pdf-title">PDF Viewer</h3>
+                        <button type="button" class="text-gray-400 hover:text-white" onclick="closePdfViewer()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-1/4 pdf-sidebar">
+                            <div class="mb-4">
+                                <img id="pdf-cover" src="" alt="PDF Cover" class="w-full rounded-lg mb-3">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                    <span class="text-gray-300 text-sm" id="pdf-size">4.5MB</span>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                                    <span class="text-gray-300 text-sm" id="pdf-rating">4.8 (128 reviews)</span>
+                                </div>
+                                <div class="flex items-center mb-4">
+                                    <i class="fas fa-tags text-green-400 mr-2"></i>
+                                    <span class="text-gray-300 text-sm" id="pdf-category">Penetration Testing</span>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="text-white text-sm font-medium mb-2">Quick Actions</h4>
+                                    <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm mb-2">
+                                        <i class="fas fa-download mr-1"></i> Download PDF
+                                    </button>
+                                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm mb-2" onclick="addBookmark()">
+                                        <i class="fas fa-bookmark mr-1"></i> Add Bookmark
+                                    </button>
+                                    <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded text-sm">
+                                        <i class="fas fa-share-alt mr-1"></i> Share
+                                    </button>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="text-white text-sm font-medium mb-2">Bookmarks</h4>
+                                    <div class="text-gray-400 text-sm space-y-1" id="bookmark-list">
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-white text-sm font-medium mb-2">Table of Contents</h4>
+                                    <div class="text-gray-400 text-sm space-y-1" id="pdf-toc">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-3/4 pdf-viewer-container">
+                            <div id="pdf-container">
+                                <div id="pdf-viewer" class="h-full w-full">
+                                    <div class="loading-container">
+                                        <i class="fas fa-file-pdf text-6xl text-red-500 mb-4"></i>
+                                        <p class="text-gray-400">Loading PDF document...</p>
+                                        <div class="loading-bar">
+                                            <div class="loading-progress" id="loading-progress"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pdf-controls">
+                                    <div class="flex items-center space-x-2">
+                                        <button id="prev-page" title="Previous Page">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <span class="text-sm text-gray-300">
+                                            Page <input type="number" id="page-input" min="1" class="text-sm" style="width: 50px;"> of <span id="total-pages">482</span>
+                                        </span>
+                                        <button id="next-page" title="Next Page">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="zoom-out" title="Zoom Out">
+                                            <i class="fas fa-search-minus"></i>
+                                        </button>
+                                        <span class="text-sm text-gray-300" id="zoom-level">100%</span>
+                                        <button id="zoom-in" title="Zoom In">
+                                            <i class="fas fa-search-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="rotate-left" title="Rotate Left">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                        <button id="rotate-right" title="Rotate Right">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="fullscreen" title="Toggle Fullscreen">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                        <button id="theme-toggle" title="Toggle Theme">
+                                            <i class="fas fa-moon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="search-container">
+                                        <input type="text" id="search-input" placeholder="Search in PDF..." class="text-sm">
+                                        <button id="search-btn" title="Search">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 bg-gray-800 rounded-lg p-4">
+                                <h4 class="text-white font-medium mb-2">AI Summary</h4>
+                                <p class="text-gray-400 text-sm" id="pdf-summary">
+                                    This PDF provides a comprehensive guide to cybersecurity, covering common vulnerabilities and exploitation techniques. It includes practical examples and defense strategies. The content is suitable for both beginners and experienced security professionals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onclick="closePdfViewer()">
+                        Close Viewer
+                    </button>
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        <i class="fas fa-bookmark mr-2"></i> Save Progress
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <section id="about" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
+                <span class="glow">About</span> <span class="text-green-400">CyberLibrary</span>
+            </h2>
+            <p class="text-lg text-gray-400 max-w-3xl mx-auto">
+                CyberLibrary is your go-to platform for accessing high-quality cybersecurity and hacking resources. Built by Shubham.
+            </p>
+        </div>
+        <div class="flex flex-col md:flex-row items-center gap-8">
+            <div class="md:w-1/2">
+                <div class="relative w-full max-w-sm mx-auto">
+                    <div class="hexagon w-64 h-72 mx-auto bg-gradient-to-br from-green-500 to-blue-600 p-4 flex flex-col justify-center items-center">
+                        <i class="fas fa-shield-alt text-5xl text-white mb-4"></i>
+                        <h3 class="title-font text-white text-xl font-bold">Secure Learning</h3>
+                        <p class="text-gray-200 text-sm mt-2 text-center">Learn ethical hacking and cybersecurity.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <p class="text-gray-300 mb-6">
+I had a huge collection of PDFs on topics like hacking, cybersecurity, penetration testing, malware analysis, and more. But they were all scattered and unorganized.
+
+So, I created this platform — CyberLibrary — to bring them together in one place, properly sorted and easy to access.
+
+Now, anyone can browse, read, and learn from these valuable resources anytime. Whether you're just starting out or already experienced, this site is here to support your cybersecurity journey.
+                <p class="text-gray-300 mb-6">
+                    Our platform offers a seamless reading experience with advanced features like 3D page turning, AI summaries, and smart zoom. Join our community of learners and start mastering the art of cybersecurity today!
+                </p>
+                <a href="#library" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                    <i class="fas fa-book-open mr-2"></i> Start Learning
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="bg-black bg-opacity-80 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-lock text-2xl text-green-400 mr-2"></i>
+                        <span class="title-font text-xl text-white">CyberLibrary</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Your ultimate resource hub for cybersecurity and ethical hacking knowledge.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-green-400 transition-all duration-300">Home</a></li>
+                        <li><a href="#library" class="text-gray-400 hover:text-green-400 transition-all duration-300">Library</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-green-400 transition-all duration-300">Features</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-green-400 transition-all duration-300">About</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Background Music</h3>
+                    <div class="soundboard">
+                        <div class="sound-controls">
+                            <select id="music-select" onchange="changeMusic()">
+                                <option value="audio/background-music1.mp3">Track 1</option>
+                                <option value="audio/background-music2.mp3">Track 2</option>
+                                <option value="audio/background-music3.mp3">Track 3</option>
+                            </select>
+                            <button id="music-pause" onclick="pauseMusic()">
+                                <i class="fas fa-pause mr-1"></i> Pause Music
+                            </button>
+                        </div>
+                        <div class="volume-control mt-2">
+                            <i class="fas fa-volume-down text-gray-400"></i>
+                            <input type="range" id="volume-control" min="0" max="2" step="0.01" value="1" onchange="adjustVolume()">
+                            <i class="fas fa-volume-up text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400 text-sm">
+                    © 2025 CyberLibrary. All rights reserved. Built with <i class="fas fa-heart text-red-500"></i> for the hacking community.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <audio id="background-audio" autoplay loop>
+        <source src="audio/background-music1.mp3" type="audio/mpeg">
+        <source src="audio/background-music2.mp3" type="audio/mpeg">
+        <source src="audio/background-music3.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#00ff88"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#00b8ff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 400,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 100,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        const pdfList = [
+            { title: "001_Certified_Ethical_Hacker_CEH_Linux_Android", path: "/pdfs/001_Certified_Ethical_Hacker_CEH_Linux_Academys_Prep_Course_PDF (1).pdf", size: "4.5MB", rating: "4.8", category: "Ethical Hacking", cover: "" },
+            { title: "Pentest_report", path: "/pdfs/2 -JBOSP - Level 5 - Offensive Security Major (OSM)-stamped (1).pdf", size: "4.2MB", rating: "4.5", category: "Penetration Testing", cover: "" },
+            { title: "AI_and_Cyber_Intro", path: "/pdfs/ai_and_cyber_intro.pdf", size: "3.0MB", rating: "4.6", category: "AI_and_Cyber", cover: "" },
+            { title: "API_Security_Guide", path: "/pdfs/api_security_guide.pdf", size: "3.5MB", rating: "4.7", category: "API_Security", cover: "" },
+            { title: "Cloud_Security_Basics", path: "/pdfs/cloud_security_basics.pdf", size: "3.8MB", rating: "4.5", category: "Cloud_Security", cover: "" },
+            { title: "Forensics_101", path: "/pdfs/forensics_101.pdf", size: "4.0MB", rating: "4.8", category: "Forensics", cover: "" },
+            { title: "General_Cybersecurity_Principles", path: "/pdfs/general_cybersecurity_principles.pdf", size: "3.2MB", rating: "4.4", category: "General_Cybersecurity", cover: "" },
+            { title: "Linux_Security_Essentials", path: "/pdfs/linux_security_essentials.pdf", size: "3.9MB", rating: "4.6", category: "Linux_Security", cover: "" },
+            { title: "Malware_Analysis_Guide", path: "/pdfs/malware_analysis_guide.pdf", size: "5.1MB", rating: "4.9", category: "Malware_Analysis", cover: "" },
+            { title: "Network_Security_Fundamentals", path: "/pdfs/network_security_fundamentals.pdf", size: "4.3MB", rating: "4.7", category: "Network_Security", cover: "" },
+            { title: "OSINT_Techniques", path: "/pdfs/osint_techniques.pdf", size: "3.7MB", rating: "4.5", category: "OSINT", cover: "" },
+            { title: "Others_Misc", path: "/pdfs/others_misc.pdf", size: "3.1MB", rating: "4.3", category: "Others", cover: "" },
+            { title: "Practice_Tests_CEH", path: "/pdfs/practice_tests_ceh.pdf", size: "4.6MB", rating: "4.8", category: "Practice_Tests", cover: "" },
+            { title: "Python_Hacking_Scripts", path: "/pdfs/python_hacking_scripts.pdf", size: "3.4MB", rating: "4.6", category: "Python_Hacking", cover: "" },
+            { title: "Tools_Manuals_Nmap", path: "/pdfs/tools_manuals_nmap.pdf", size: "4.1MB", rating: "4.7", category: "Tools_Manuals", cover: "" },
+            { title: "Web_Security_Essentials", path: "/pdfs/web_security_essentials.pdf", size: "3.9MB", rating: "4.5", category: "Web_Security", cover: "" }
+        ];
+
+        const tableOfContentsMap = {
+            "001_Certified_Ethical_Hacker_CEH_Linux_Android": [
+                "1. Introduction to Ethical Hacking",
+                "2. Linux Security Basics",
+                "3. Android Vulnerabilities",
+                "4. Exploiting Linux Systems",
+                "5. Android Penetration Testing",
+                "6. Defense Mechanisms"
+            ],
+            "Pentest_report": [
+                "1. Pentest Overview",
+                "2. Vulnerability Findings",
+                "3. Beyblade Details",
+                "4. Mitigation Steps",
+                "5. Security Recommendations",
+                "6. Conclusion"
+            ]
+        };
+
+        const categoriesList = document.getElementById('categories-list');
+        const uniqueCategories = [...new Set(pdfList.map(pdf => pdf.category))];
+        const allCategoriesButton = document.createElement('button');
+        allCategoriesButton.className = 'bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium';
+        allCategoriesButton.textContent = 'All Categories';
+        allCategoriesButton.onclick = () => filterPdfs('All Categories');
+        categoriesList.appendChild(allCategoriesButton);
+
+        uniqueCategories.forEach(category => {
+            const button = document.createElement('button');
+            button.className = 'bg-gray-800 text-gray-300 hover:bg-gray-700 px-4 py-2 rounded-full text-sm font-medium';
+            button.textContent = category;
+            button.onclick = () => filterPdfs(category);
+            categoriesList.appendChild(button);
+        });
+
+        const pdfGrid = document.getElementById('pdf-grid');
+        function renderPdfs(filteredPdfs) {
+            pdfGrid.innerHTML = '';
+            filteredPdfs.forEach(pdf => {
+                const pdfCard = document.createElement('div');
+                pdfCard.className = 'bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border';
+                pdfCard.innerHTML = `
+                    <div class="pdf-thumbnail w-full h-48 bg-gray-800 rounded-lg mb-4 flex items-center justify-center">
+                        <i class="fas fa-file-pdf text-5xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">${pdf.title}</h3>
+                    <p class="text-gray-400 text-sm mb-2">${pdf.category}</p>
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                        <span class="text-gray-300 text-sm">${pdf.rating}</span>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-file-pdf text-red-500 mr-1"></i>
+                        <span class="text-gray-300 text-sm">${pdf.size}</span>
+                    </div>
+                    <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm" onclick="openPdfViewer('${pdf.title}', '${pdf.path}', '${pdf.size}', '${pdf.rating}', '${pdf.category}')">
+                        <i class="fas fa-eye mr-1"></i> View PDF
+                    </button>
+                `;
+                pdfGrid.appendChild(pdfCard);
+            });
+        }
+
+        renderPdfs(pdfList);
+
+        function filterPdfs(category) {
+            const buttons = categoriesList.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if (btn.textContent === category) {
+                    btn.className = 'bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium';
+                } else {
+                    btn.className = 'bg-gray-800 text-gray-300 hover:bg-gray-700 px-4 py-2 rounded-full text-sm font-medium';
+                }
+            });
+
+            if (category === 'All Categories') {
+                renderPdfs(pdfList);
+            } else {
+                const filteredPdfs = pdfList.filter(pdf => pdf.category === category);
+                renderPdfs(filteredPdfs);
+            }
+        }
+
+        function updateTerminal() {
+            const terminalBody = document.getElementById('terminal-body');
+            terminalBody.innerHTML = `<div class="mb-2"><span class="command">user@cyberlibrary:~$</span> search --type=pdf --category="penetration testing"</div>`;
+            
+            setTimeout(() => {
+                terminalBody.innerHTML += `<div class="mb-2 response">Searching database... <span class="loading-dots"></span></div>`;
+                setTimeout(() => {
+                    const filteredPdfs = pdfList.filter(pdf => pdf.category.toLowerCase() === "penetration testing");
+                    const pdfLines = filteredPdfs.map((pdf, index) => 
+                        `${index + 1}. ${pdf.title}.pdf (${pdf.size}) ★★★★☆`
+                    ).join('<br>');
+                    terminalBody.innerHTML += `<div class="mb-2 response">${pdfLines}</div>`;
+                    terminalBody.innerHTML += `<div class="mb-2"><span class="command">user@cyberlibrary:~$</span> open --file="${filteredPdfs[0]?.title}.pdf"</div>`;
+                    setTimeout(() => {
+                        terminalBody.innerHTML += `<div class="mb-2 response">Opening PDF in 3D viewer... <span class="loading-dots"></span></div>`;
+                        setTimeout(() => {
+                            terminalBody.innerHTML += `<div class="mb-2 response">PDF loaded successfully. Page 1 of ${filteredPdfs[0]?.title === "Pentest_report" ? "482" : "unknown"} displayed.</div>`;
+                            terminalBody.innerHTML += `<div class="mb-2"><span class="command">user@cyberlibrary:~$</span> <span class="cursor">_</span></div>`;
+                            terminalBody.scrollTop = terminalBody.scrollHeight;
+                        }, 1500);
+                    }, 1500);
+                }, 1500);
+            }, 1500);
+        }
+
+        updateTerminal();
+
+        let currentPdfTitle = null;
+        let currentPage = 1;
+        let pdfDoc = null;
+
+        function openPdfViewer(title, path, size, rating, category) {
+            currentPdfTitle = title;
+            const modal = document.getElementById('pdf-modal');
+            document.getElementById('pdf-title').textContent = title;
+            document.getElementById('pdf-size').textContent = size;
+            document.getElementById('pdf-rating').textContent = rating;
+            document.getElementById('pdf-category').textContent = category;
+            const toc = tableOfContentsMap[title] || [];
+            const tocElement = document.getElementById('pdf-toc');
+            tocElement.innerHTML = toc.map((item, index) => `<div onclick="jumpToPage(${index + 1})">${item}</div>`).join('');
+
+            loadBookmarks(title);
+
+            const pdfViewer = document.getElementById('pdf-viewer');
+            pdfViewer.innerHTML = `
+                <div class="loading-container">
+                    <i class="fas fa-file-pdf text-6xl text-red-500 mb-4"></i>
+                    <p class="text-gray-400">Loading PDF document...</p>
+                    <div class="loading-bar">
+                        <div class="loading-progress" id="loading-progress"></div>
+                    </div>
+                </div>
+            `;
+
+            let scale = 1.5 * window.devicePixelRatio;
+            let rotation = 0;
+            const zoomStep = 0.2;
+            let isPinching = false;
+            let lastPinchDistance = 0;
+
+            const loadingProgress = document.getElementById('loading-progress');
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                loadingProgress.style.width = `${progress}%`;
+                if (progress >= 100) clearInterval(progressInterval);
+            }, 200);
+
+            pdfjsLib.getDocument(path).promise.then(pdf => {
+                clearInterval(progressInterval);
+                loadingProgress.style.width = '100%';
+                pdfDoc = pdf;
+                document.getElementById('total-pages').textContent = pdfDoc.numPages;
+                const pageInput = document.getElementById('page-input');
+                pageInput.value = currentPage;
+                pageInput.max = pdfDoc.numPages;
+
+                function renderPage(pageNum) {
+                    pdfDoc.getPage(pageNum).then(page => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const viewport = page.getViewport({ scale: scale, rotation: rotation });
+                        
+                        canvas.height = viewport.height * window.devicePixelRatio;
+                        canvas.width = viewport.width * window.devicePixelRatio;
+                        canvas.style.width = `${viewport.width}px`;
+                        canvas.style.height = `${viewport.height}px`;
+                        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+                        pdfViewer.innerHTML = '';
+                        pdfViewer.appendChild(canvas);
+
+                        page.render({
+                            canvasContext: ctx,
+                            viewport: viewport
+                        });
+
+                        document.getElementById('zoom-level').textContent = `${Math.round(scale * 100)}%`;
+                        pageInput.value = pageNum;
+                        currentPage = pageNum;
+                    });
+                }
+
+                renderPage(currentPage);
+
+                document.getElementById('prev-page').onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPage(currentPage);
+                        pdfViewer.scrollTop = 0;
+                    }
+                };
+
+                document.getElementById('next-page').onclick = () => {
+                    if (currentPage < pdfDoc.numPages) {
+                        currentPage++;
+                        renderPage(currentPage);
+                        pdfViewer.scrollTop = 0;
+                    }
+                };
+
+                document.addEventListener('keydown', (e) => {
+                    if (!modal.classList.contains('hidden')) {
+                        if (e.key === 'ArrowLeft' && currentPage > 1) {
+                            currentPage--;
+                            renderPage(currentPage);
+                            pdfViewer.scrollTop = 0;
+                        } else if (e.key === 'ArrowRight' && currentPage < pdfDoc.numPages) {
+                            currentPage++;
+                            renderPage(currentPage);
+                            pdfViewer.scrollTop = 0;
+                        }
+                    }
+                });
+
+                document.getElementById('zoom-in').onclick = () => {
+                    scale += zoomStep;
+                    if (scale > 3.0) scale = 3.0;
+                    renderPage(currentPage);
+                };
+
+                document.getElementById('zoom-out').onclick = () => {
+                    scale -= zoomStep;
+                    if (scale < 0.5) scale = 0.5;
+                    renderPage(currentPage);
+                };
+
+                pdfViewer.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 2) {
+                        isPinching = true;
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        lastPinchDistance = Math.hypot(
+                            touch1.pageX - touch2.pageX,
+                            touch1.pageY - touch2.pageY
+                        );
+                    }
+                });
+
+                pdfViewer.addEventListener('touchmove', (e) => {
+                    if (isPinching && e.touches.length === 2) {
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const currentDistance = Math.hypot(
+                            touch1.pageX - touch2.pageX,
+                            touch1.pageY - touch2.pageY
+                        );
+                        const delta = currentDistance - lastPinchDistance;
+                        scale += delta * 0.005;
+                        scale = Math.min(Math.max(scale, 0.5), 3.0);
+                        lastPinchDistance = currentDistance;
+                        renderPage(currentPage);
+                    }
+                });
+
+                pdfViewer.addEventListener('touchend', () => {
+                    isPinching = false;
+                });
+
+                document.getElementById('rotate-left').onclick = () => {
+                    rotation -= 90;
+                    if (rotation < 0) rotation += 360;
+                    renderPage(currentPage);
+                };
+
+                document.getElementById('rotate-right').onclick = () => {
+                    rotation += 90;
+                    if (rotation >= 360) rotation -= 360;
+                    renderPage(currentPage);
+                };
+
+                const pdfContainer = document.getElementById('pdf-container');
+                document.getElementById('fullscreen').onclick = () => {
+                    if (!document.fullscreenElement) {
+                        pdfContainer.requestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
+                };
+
+                document.addEventListener('fullscreenchange', () => {
+                    const fullscreenBtn = document.getElementById('fullscreen');
+                    if (document.fullscreenElement) {
+                        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                    } else {
+                        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                    }
+                    renderPage(currentPage);
+                });
+
+                document.getElementById('theme-toggle').onclick = () => {
+                    pdfContainer.classList.toggle('light-mode');
+                    const themeBtn = document.getElementById('theme-toggle');
+                    if (pdfContainer.classList.contains('light-mode')) {
+                        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                    } else {
+                        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+                    }
+                };
+
+                document.getElementById('page-input').onchange = () => {
+                    let pageNum = parseInt(document.getElementById('page-input').value);
+                    if (pageNum >= 1 && pageNum <= pdfDoc.numPages) {
+                        currentPage = pageNum;
+                        renderPage(currentPage);
+                        pdfViewer.scrollTop = 0;
+                    } else {
+                        document.getElementById('page-input').value = currentPage;
+                    }
+                };
+
+                document.getElementById('search-btn').onclick = () => {
+                    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                    if (!searchTerm) return;
+
+                    let found = false;
+                    const searchPage = async (pageNum) => {
+                        const page = await pdfDoc.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        const text = textContent.items.map(item => item.str).join(' ').toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            currentPage = pageNum;
+                            renderPage(currentPage);
+                            pdfViewer.scrollTop = 0;
+                            found = true;
+                        }
+                    };
+
+                    (async () => {
+                        for (let i = 1; i <= pdfDoc.numPages; i++) {
+                            await searchPage(i);
+                            if (found) break;
+                        }
+                        if (!found) {
+                            alert('Text not found in PDF.');
+                        }
+                    })();
+                };
+
+                window.jumpToPage = (pageNum) => {
+                    if (pageNum >= 1 && pageNum <= pdfDoc.numPages) {
+                        currentPage = pageNum;
+                        renderPage(currentPage);
+                        pdfViewer.scrollTop = 0;
+                    }
+                };
+
+            }).catch(err => {
+                clearInterval(progressInterval);
+                pdfViewer.innerHTML = `<p class="text-red-500">Error loading PDF: ${err.message}</p>`;
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePdfViewer() {
+            document.getElementById('pdf-modal').classList.add('hidden');
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            currentPdfTitle = null;
+            currentPage = 1;
+            pdfDoc = null;
+        }
+
+        function addBookmark() {
+            if (!currentPdfTitle || !currentPage) return;
+
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{}');
+            if (!bookmarks[currentPdfTitle]) {
+                bookmarks[currentPdfTitle] = [];
+            }
+
+            const timestamp = new Date().toLocaleString();
+            bookmarks[currentPdfTitle].push({ page: currentPage, timestamp: timestamp });
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+            loadBookmarks(currentPdfTitle);
+        }
+
+        function loadBookmarks(title) {
+            const bookmarkList = document.getElementById('bookmark-list');
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{}');
+            const pdfBookmarks = bookmarks[title] || [];
+
+            if (pdfBookmarks.length === 0) {
+                bookmarkList.innerHTML = '<div>No bookmarks yet.</div>';
+            } else {
+                bookmarkList.innerHTML = pdfBookmarks.map((bm, index) => `
+                    <div class="bookmark-item">
+                        <span onclick="jumpToPage(${bm.page})">Page ${bm.page} - ${bm.timestamp}</span>
+                        <button onclick="removeBookmark('${title}', ${index})">Remove</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function removeBookmark(title, index) {
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{}');
+            if (bookmarks[title]) {
+                bookmarks[title].splice(index, 1);
+                if (bookmarks[title].length === 0) {
+                    delete bookmarks[title];
+                }
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                loadBookmarks(title);
+            }
+        }
+
+        document.getElementById('mobile-menu-button').onclick = () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        };
+
+        const cursor = document.getElementById('custom-cursor');
+        const canvas = document.getElementById('cursor-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        let isMouseMoving = false;
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (!isMobile) {
+            cursor.style.display = 'block';
+            canvas.style.display = 'block';
+            document.body.style.cursor = 'none';
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.life = 50;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life--;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(0, 255, 136, ${this.life / 50})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function handleParticles() {
+            for (let i = particlesArray.length - 1; i >= 0; i--) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].life <= 0) {
+                    particlesArray.splice(i, 1);
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
+
+       animate();
+
+        document.addEventListener('mousemove', (e) => {
+            isMouseMoving = true;
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            if (particlesArray.length < 100) {
+                for (let i = 0; i < 2; i++) {
+                    particlesArray.push(new Particle(e.clientX, e.clientY));
+                }
+            }
+        });
+
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                cursor.classList.add('hover');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                cursor.classList.remove('hover');
+            }
+        });
+
+        let mouseTimeout;
+        document.addEventListener('mousemove', () => {
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => {
+                isMouseMoving = false;
+                cursor.style.opacity = '0';
+            }, 1000);
+            cursor.style.opacity = '1';
+        });
+
+        const audio = document.getElementById('background-audio');
+        audio.volume = 1.0; // Default volume (100%)
+
+        function changeMusic() {
+            const select = document.getElementById('music-select');
+            const selectedTrack = select.value;
+            audio.src = selectedTrack;
+            audio.play().catch(err => {
+                console.error('Error playing audio:', err);
+            });
+        }
+
+        function pauseMusic() {
+            audio.pause();
+            document.getElementById('music-pause').classList.add('active');
+        }
+
+        function adjustVolume() {
+            const volumeControl = document.getElementById('volume-control');
+            audio.volume = volumeControl.value / 2; // Scale 0-2 to 0-1 for audio volume
+        }
+
+        window.addEventListener('load', () => {
+            audio.play().catch(err => {
+                console.error('Error auto-playing audio:', err);
+            });
+        });
+    </script>
+</body>
+</html>
