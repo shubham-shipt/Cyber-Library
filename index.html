@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberLibrary - Hacker & Security PDF Collection</title>
+    <title>CyberLibrary</title>
+    <link rel="icon" type="image/x-icon" href="con.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;700&display=swap');
-        
+
         :root {
             --primary: #00ff88;
             --secondary: #00b8ff;
@@ -22,7 +24,7 @@
             --text-dark: #ccd6f6;
             --text-light: #333;
         }
-        
+
         body {
             font-family: 'Roboto Mono', monospace;
             background-color: var(--darker);
@@ -31,44 +33,44 @@
             margin: 0;
             cursor: none;
         }
-        
+
         .title-font {
             font-family: 'Orbitron', sans-serif;
         }
-        
+
         .glow {
             text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
         }
-        
+
         .glow-secondary {
             text-shadow: 0 0 10px rgba(0, 184, 255, 0.7);
         }
-        
+
         .card-hover {
             transition: all 0.3s ease;
             transform-style: preserve-3d;
         }
-        
+
         .card-hover:hover {
             transform: translateY(-10px) rotateX(5deg);
             box-shadow: 0 20px 30px rgba(0, 255, 136, 0.2);
         }
-        
+
         .pdf-thumbnail {
             background: linear-gradient(145deg, #0a192f, #020c1b);
             box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
-        
+
         .pdf-thumbnail:hover {
             transform: scale(1.05) rotate(1deg);
         }
-        
+
         .neon-border {
             position: relative;
             border: 2px solid transparent;
         }
-        
+
         .neon-border::before {
             content: '';
             position: absolute;
@@ -84,12 +86,12 @@
             mask-composite: exclude;
             pointer-events: none;
         }
-        
+
         .scanline {
             position: relative;
             overflow: hidden;
         }
-        
+
         .scanline::after {
             content: '';
             position: absolute;
@@ -100,49 +102,82 @@
             background: linear-gradient(to right, transparent, var(--primary), transparent);
             animation: scan 8s linear infinite;
         }
-        
+
         @keyframes scan {
-            0% { top: 0; opacity: 0; }
-            5% { opacity: 1; }
-            95% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            5% {
+                opacity: 1;
+            }
+
+            95% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
         }
-        
+
         .floating {
             animation: floating 6s ease-in-out infinite;
         }
-        
+
         @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
-        
+
         .floating-delay-1 {
             animation-delay: 1s;
         }
-        
+
         .floating-delay-2 {
             animation-delay: 2s;
         }
-        
+
         .typewriter {
             overflow: hidden;
             border-right: 3px solid var(--primary);
             white-space: nowrap;
             animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
         }
-        
+
         @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
         }
-        
+
         @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: var(--primary) }
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: var(--primary)
+            }
         }
-        
+
         #pdf-container {
             perspective: 1000px;
             position: relative;
@@ -154,7 +189,7 @@
             resize: both;
             overflow: auto;
         }
-        
+
         #pdf-viewer {
             transform-style: preserve-3d;
             transition: transform 0.5s ease;
@@ -166,98 +201,127 @@
             flex-direction: column;
             align-items: center;
         }
-        
+
         #pdf-viewer canvas {
             display: block;
             margin: 0;
             width: 100%;
             height: auto;
         }
-        
+
         .page-turn {
             animation: pageTurn 0.8s ease-out;
         }
-        
+
         @keyframes pageTurn {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(-90deg); }
-            100% { transform: rotateY(0deg); }
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            50% {
+                transform: rotateY(-90deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
         }
-        
+
         .hexagon {
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         }
-        
+
         .grid-bg {
-            background-image: 
+            background-image:
                 linear-gradient(rgba(0, 184, 255, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 184, 255, 0.1) 1px, transparent 1px);
             background-size: 40px 40px;
         }
-        
+
         .terminal {
             background: rgba(10, 25, 47, 0.8);
             border-radius: 5px;
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
-        
+
         .terminal-header {
             background: linear-gradient(to right, var(--dark), var(--darker));
             border-top-left-radius: 5px;
             border-top-right-radius: 5px;
         }
-        
+
         .terminal-body {
             font-family: 'Roboto Mono', monospace;
             height: 300px;
             overflow-y: auto;
         }
-        
+
         .command {
             color: var(--primary);
         }
-        
+
         .response {
             color: var(--light);
         }
-        
+
         .cursor {
             animation: blink 1s step-end infinite;
         }
-        
+
         @keyframes blink {
-            from, to { opacity: 1; }
-            50% { opacity: 0; }
+
+            from,
+            to {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
         }
-        
+
         .loading-dots::after {
             content: '.';
             animation: dots 1.5s steps(5, end) infinite;
         }
-        
+
         @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60% { content: '...'; }
-            80%, 100% { content: ''; }
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60% {
+                content: '...';
+            }
+
+            80%,
+            100% {
+                content: '';
+            }
         }
-        
+
         .book-3d {
             transform-style: preserve-3d;
             transform: rotateY(-20deg);
             transition: transform 0.5s ease;
             box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
         }
-        
+
         .book-3d:hover {
             transform: rotateY(-5deg) translateY(-10px);
         }
-        
+
         .book-cover {
             transform: translateZ(20px);
             backface-visibility: hidden;
         }
-        
+
         .book-spine {
             position: absolute;
             left: 0;
@@ -267,7 +331,7 @@
             background: linear-gradient(to right, #111, #333);
             transform: rotateY(90deg) translateX(-10px);
         }
-        
+
         .book-pages {
             position: absolute;
             right: 0;
@@ -277,7 +341,7 @@
             background: #f5f5f5;
             transform: translateZ(-10px) rotateY(90deg) translateX(10px);
         }
-        
+
         #particles-js {
             position: fixed;
             width: 100%;
@@ -286,7 +350,7 @@
             left: 0;
             z-index: -1;
         }
-        
+
         #pdf-modal {
             background: rgba(0, 0, 0, 0.95);
         }
@@ -391,6 +455,7 @@
             .pdf-sidebar {
                 width: 20%;
             }
+
             .pdf-viewer-container {
                 width: 80%;
             }
@@ -485,8 +550,13 @@
         }
 
         @keyframes pulse {
-            from { transform: scale(1.5); }
-            to { transform: scale(1.8); }
+            from {
+                transform: scale(1.5);
+            }
+
+            to {
+                transform: scale(1.8);
+            }
         }
 
         #cursor-canvas {
@@ -500,8 +570,8 @@
             display: none;
         }
 
-        #pdf-viewer:hover ~ #custom-cursor,
-        #pdf-viewer:hover ~ #cursor-canvas {
+        #pdf-viewer:hover~#custom-cursor,
+        #pdf-viewer:hover~#cursor-canvas {
             display: none !important;
         }
 
@@ -581,11 +651,11 @@
                 transform: rotateY(0deg);
                 margin: 20px auto;
             }
-            
+
             .terminal-body {
                 height: 200px;
             }
-            
+
             .typewriter {
                 white-space: normal;
                 border-right: none;
@@ -604,7 +674,7 @@
                 padding: 10px;
             }
 
-            .pdf-controls > div {
+            .pdf-controls>div {
                 margin-bottom: 10px;
                 justify-content: center;
             }
@@ -683,12 +753,13 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen grid-bg">
     <div id="custom-cursor"></div>
     <canvas id="cursor-canvas"></canvas>
 
     <div id="particles-js"></div>
-    
+
     <nav class="bg-black bg-opacity-80 backdrop-filter backdrop-blur-lg fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -696,30 +767,39 @@
                     <div class="flex-shrink-0">
                         <div class="flex items-center">
                             <i class="fas fa-lock text-2xl text-green-400 mr-2"></i>
-                            <span class="title-font text-xl text-white">Cyber<span class="text-green-400">Library</span></span>
+                            <span class="title-font text-xl text-white">Cyber<span
+                                    class="text-green-400">Library</span></span>
                         </div>
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#home" class="text-green-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Home</a>
-                            <a href="#library" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Library</a>
-                            <a href="#features" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Features</a>
-                            <a href="#about" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">About</a>
+                            <a href="#home"
+                                class="text-green-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Home</a>
+                            <a href="#library"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Library</a>
+                            <a href="#features"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">Features</a>
+                            <a href="#about"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300">About</a>
                         </div>
                     </div>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-4 flex items-center md:ml-6">
                         <div class="relative">
-                            <input type="text" class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-64" placeholder="Search PDFs...">
-                            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                            <input type="text"
+                                class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-64"
+                                placeholder="Search PDFs...">
+                            <button
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </div>
                 </div>
                 <div class="-mr-2 flex md:hidden">
-                    <button type="button" id="mobile-menu-button" class="bg-gray-900 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                    <button type="button" id="mobile-menu-button"
+                        class="bg-gray-900 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                         <span class="sr-only">Open main menu</span>
                         <i class="fas fa-bars"></i>
                     </button>
@@ -729,32 +809,41 @@
         <div class="hidden md:hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#home" class="text-green-400 block px-3 py-2 rounded-md text-base font-medium">Home</a>
-                <a href="#library" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Library</a>
-                <a href="#features" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Features</a>
-                <a href="#about" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
+                <a href="#library"
+                    class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Library</a>
+                <a href="#features"
+                    class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Features</a>
+                <a href="#about"
+                    class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About</a>
             </div>
             <div class="pt-4 pb-3 border-t border-gray-700">
                 <div class="px-5">
-                    <input type="text" class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-full" placeholder="Search PDFs...">
+                    <input type="text"
+                        class="bg-gray-900 text-white px-4 py-1 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 w-full"
+                        placeholder="Search PDFs...">
                 </div>
             </div>
         </div>
     </nav>
-    
+
     <section id="home" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
                 <h1 class="title-font text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white">
-                    <span class="glow">Hacker</span> <span class="text-green-400">Resources</span> <span class="glow-secondary">Collection</span>
+                    <span class="glow">Hacker</span> <span class="text-green-400">Resources</span> <span
+                        class="glow-secondary">Collection</span>
                 </h1>
                 <p class="text-lg text-gray-300 mb-8 max-w-lg">
-                    Access over <span class="text-green-400 font-bold">100+</span> premium cybersecurity and hacking PDFs in one place. Learn, explore and master the art of digital security.
+                    Access over <span class="text-green-400 font-bold">100+</span> premium cybersecurity and hacking
+                    PDFs in one place. Learn, explore and master the art of digital security.
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="#library" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/30">
+                    <a href="#library"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/30">
                         <i class="fas fa-book-open mr-2"></i> Explore Library
                     </a>
-                    <a href="#features" class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
+                    <a href="#features"
+                        class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105">
                         <i class="fas fa-star mr-2"></i> Features
                     </a>
                 </div>
@@ -762,13 +851,14 @@
             <div class="md:w-1/2 relative">
                 <div class="relative w-full max-w-md mx-auto">
                     <div class="book-3d w-64 h-80 mx-auto relative">
-                        <div class="book-cover w-full h-full bg-gradient-to-br from-green-500 to-blue-600 rounded-lg p-4 flex flex-col justify-between">
+                        <div
+                            class="book-cover w-full h-full bg-gradient-to-br from-green-500 to-blue-600 rounded-lg p-4 flex flex-col justify-between">
                             <div>
                                 <div class="w-10 h-1 bg-white mb-2"></div>
                                 <div class="w-8 h-1 bg-white mb-2"></div>
                             </div>
-                            <div class="text-center">
-                                <h3 class="title-font text-white text-xl mb-2">Hacker's</h3>
+                            <div class="text-center">``
+                                <h3 class="title-font text-white text-xl mb-2">Cyber</h3>
                                 <h2 class="title-font text-white text-3xl font-bold">Handbook</h2>
                             </div>
                             <div class="text-right">
@@ -779,13 +869,17 @@
                         <div class="book-pages"></div>
                     </div>
                     <div class="absolute -top-10 -left-10 w-20 h-20 bg-blue-500 rounded-full opacity-20 floating"></div>
-                    <div class="absolute -bottom-5 -right-5 w-24 h-24 bg-green-500 rounded-full opacity-20 floating floating-delay-1"></div>
-                    <div class="absolute top-1/2 -right-10 w-16 h-16 bg-purple-500 rounded-full opacity-20 floating floating-delay-2"></div>
+                    <div
+                        class="absolute -bottom-5 -right-5 w-24 h-24 bg-green-500 rounded-full opacity-20 floating floating-delay-1">
+                    </div>
+                    <div
+                        class="absolute top-1/2 -right-10 w-16 h-16 bg-purple-500 rounded-full opacity-20 floating floating-delay-2">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
@@ -802,7 +896,8 @@
                 </div>
                 <h3 class="text-xl font-bold text-white mb-3">3D Page Turning</h3>
                 <p class="text-gray-400">
-                    Experience realistic 3D page turning animations that make reading digital PDFs feel like physical books.
+                    Experience realistic 3D page turning animations that make reading digital PDFs feel like physical
+                    books.
                 </p>
             </div>
             <div class="bg-gray-900 bg-opacity-70 rounded-xl p-6 card-hover neon-border">
@@ -852,7 +947,7 @@
             </div>
         </div>
     </section>
-    
+
     <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="bg-black bg-opacity-80 rounded-xl overflow-hidden">
             <div class="terminal">
@@ -867,12 +962,13 @@
                     </div>
                 </div>
                 <div class="terminal-body p-4 font-mono text-sm" id="terminal-body">
-                    <div class="mb-2"><span class="command">user@cyberlibrary:~$</span> search --type=pdf --category="penetration testing"</div>
+                    <div class="mb-2"><span class="command">user@cyberlibrary:~$</span> search --type=pdf
+                        --category="penetration testing"</div>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <section id="library" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
@@ -887,19 +983,21 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="pdf-grid">
         </div>
         <div class="text-center mt-12">
-            <button class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-8 rounded-full transition-all duration-300">
+            <button
+                class="border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-bold py-3 px-8 rounded-full transition-all duration-300">
                 <i class="fas fa-sync-alt mr-2"></i> Load More PDFs
             </button>
         </div>
     </section>
-    
+
     <div id="pdf-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
                 <div class="absolute inset-0 bg-black bg-opacity-90"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"></span>
-            <div class="inline-block align-bottom bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[90vw] sm:w-full">
+            <div
+                class="inline-block align-bottom bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[90vw] sm:w-full">
                 <div class="bg-gray-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-white" id="pdf-title">PDF Viewer</h3>
@@ -910,7 +1008,8 @@
                     <div class="flex flex-col md:flex-row">
                         <div class="w-full md:w-1/4 pdf-sidebar">
                             <div class="mb-4">
-                                <img id="pdf-cover" src="" alt="PDF Cover" class="w-full rounded-lg mb-3">
+                                <img id="pdf-cover" src="/images/con.png" alt="PDF Cover"
+                                    class="w-full rounded-lg mb-3">
                                 <div class="flex items-center mb-2">
                                     <i class="fas fa-file-pdf text-red-500 mr-2"></i>
                                     <span class="text-gray-300 text-sm" id="pdf-size">4.5MB</span>
@@ -925,13 +1024,17 @@
                                 </div>
                                 <div class="mb-4">
                                     <h4 class="text-white text-sm font-medium mb-2">Quick Actions</h4>
-                                    <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm mb-2">
+                                    <button
+                                        class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm mb-2">
                                         <i class="fas fa-download mr-1"></i> Download PDF
                                     </button>
-                                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm mb-2" onclick="addBookmark()">
+                                    <button
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm mb-2"
+                                        onclick="addBookmark()">
                                         <i class="fas fa-bookmark mr-1"></i> Add Bookmark
                                     </button>
-                                    <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded text-sm">
+                                    <button
+                                        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 rounded text-sm">
                                         <i class="fas fa-share-alt mr-1"></i> Share
                                     </button>
                                 </div>
@@ -964,7 +1067,8 @@
                                             <i class="fas fa-chevron-left"></i>
                                         </button>
                                         <span class="text-sm text-gray-300">
-                                            Page <input type="number" id="page-input" min="1" class="text-sm" style="width: 50px;"> of <span id="total-pages">482</span>
+                                            Page <input type="number" id="page-input" min="1" class="text-sm"
+                                                style="width: 50px;"> of <span id="total-pages">482</span>
                                         </span>
                                         <button id="next-page" title="Next Page">
                                             <i class="fas fa-chevron-right"></i>
@@ -996,7 +1100,8 @@
                                         </button>
                                     </div>
                                     <div class="search-container">
-                                        <input type="text" id="search-input" placeholder="Search in PDF..." class="text-sm">
+                                        <input type="text" id="search-input" placeholder="Search in PDF..."
+                                            class="text-sm">
                                         <button id="search-btn" title="Search">
                                             <i class="fas fa-search"></i>
                                         </button>
@@ -1006,37 +1111,44 @@
                             <div class="mt-4 bg-gray-800 rounded-lg p-4">
                                 <h4 class="text-white font-medium mb-2">AI Summary</h4>
                                 <p class="text-gray-400 text-sm" id="pdf-summary">
-                                    This PDF provides a comprehensive guide to cybersecurity, covering common vulnerabilities and exploitation techniques. It includes practical examples and defense strategies. The content is suitable for both beginners and experienced security professionals.
+                                    This PDF provides a comprehensive guide to cybersecurity, covering common
+                                    vulnerabilities and exploitation techniques. It includes practical examples and
+                                    defense strategies. The content is suitable for both beginners and experienced
+                                    security professionals.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" onclick="closePdfViewer()">
+                    <button type="button"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                        onclick="closePdfViewer()">
                         Close Viewer
                     </button>
-                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    <button type="button"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-white hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                         <i class="fas fa-bookmark mr-2"></i> Save Progress
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <section id="about" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center mb-16">
             <h2 class="title-font text-3xl sm:text-4xl font-bold text-white mb-4">
                 <span class="glow">About</span> <span class="text-green-400">CyberLibrary</span>
             </h2>
             <p class="text-lg text-gray-400 max-w-3xl mx-auto">
-                CyberLibrary is your go-to platform for accessing high-quality cybersecurity and hacking resources. Built by Shubham.
+                Cyber-Library Built by Shubham.
             </p>
         </div>
         <div class="flex flex-col md:flex-row items-center gap-8">
             <div class="md:w-1/2">
                 <div class="relative w-full max-w-sm mx-auto">
-                    <div class="hexagon w-64 h-72 mx-auto bg-gradient-to-br from-green-500 to-blue-600 p-4 flex flex-col justify-center items-center">
+                    <div
+                        class="hexagon w-64 h-72 mx-auto bg-gradient-to-br from-green-500 to-blue-600 p-4 flex flex-col justify-center items-center">
                         <i class="fas fa-shield-alt text-5xl text-white mb-4"></i>
                         <h3 class="title-font text-white text-xl font-bold">Secure Learning</h3>
                         <p class="text-gray-200 text-sm mt-2 text-center">Learn ethical hacking and cybersecurity.</p>
@@ -1045,21 +1157,27 @@
             </div>
             <div class="md:w-1/2">
                 <p class="text-gray-300 mb-6">
-I had a huge collection of PDFs on topics like hacking, cybersecurity, penetration testing, malware analysis, and more. But they were all scattered and unorganized.
+                    I had a huge collection of PDFs on topics like hacking, cybersecurity, penetration testing, malware
+                    analysis, and more. But they were all scattered and unorganized.
 
-So, I created this platform — CyberLibrary — to bring them together in one place, properly sorted and easy to access.
+                    So, I created this platform — CyberLibrary — to bring them together in one place, properly sorted
+                    and easy to access.
 
-Now, anyone can browse, read, and learn from these valuable resources anytime. Whether you're just starting out or already experienced, this site is here to support your cybersecurity journey.
+                    Now, anyone can browse, read, and learn from these valuable resources anytime. Whether you're just
+                    starting out or already experienced, this site is here to support your cybersecurity journey.
                 <p class="text-gray-300 mb-6">
-                    Our platform offers a seamless reading experience with advanced features like 3D page turning, AI summaries, and smart zoom. Join our community of learners and start mastering the art of cybersecurity today!
+                    Our platform offers a seamless reading experience with advanced features like 3D page turning, AI
+                    summaries, and smart zoom. Join our community of learners and start mastering the art of
+                    cybersecurity today!
                 </p>
-                <a href="#library" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
+                <a href="#library"
+                    class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300">
                     <i class="fas fa-book-open mr-2"></i> Start Learning
                 </a>
             </div>
         </div>
     </section>
-    
+
     <footer class="bg-black bg-opacity-80 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -1075,24 +1193,28 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
                 <div>
                     <h3 class="text-lg font-bold text-white mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-green-400 transition-all duration-300">Home</a></li>
-                        <li><a href="#library" class="text-gray-400 hover:text-green-400 transition-all duration-300">Library</a></li>
-                        <li><a href="#features" class="text-gray-400 hover:text-green-400 transition-all duration-300">Features</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-green-400 transition-all duration-300">About</a></li>
+                        <li><a href="#home"
+                                class="text-gray-400 hover:text-green-400 transition-all duration-300">Home</a></li>
+                        <li><a href="#library"
+                                class="text-gray-400 hover:text-green-400 transition-all duration-300">Library</a></li>
+                        <li><a href="#features"
+                                class="text-gray-400 hover:text-green-400 transition-all duration-300">Features</a></li>
+                        <li><a href="#about"
+                                class="text-gray-400 hover:text-green-400 transition-all duration-300">About</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-white mb-4">Connect With Us</h3>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                        <!-- <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
                             <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                        </a> -->
+                        <a href="https://github.com/shubham-shipt" class="text-gray-400 hover:text-green-400 transition-all duration-300">
                             <i class="fab fa-github text-xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
+                        <!-- <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
                             <i class="fab fa-linkedin text-xl"></i>
-                        </a>
+                        </a> -->
                         <a href="#" class="text-gray-400 hover:text-green-400 transition-all duration-300">
                             <i class="fab fa-discord text-xl"></i>
                         </a>
@@ -1103,9 +1225,9 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
                     <div class="soundboard">
                         <div class="sound-controls">
                             <select id="music-select" onchange="changeMusic()">
-                                <option value="audio/background-music1.mp3">Track 1</option>
-                                <option value="audio/background-music2.mp3">Track 2</option>
-                                <option value="audio/background-music3.mp3">Track 3</option>
+                                <option value="1.mp3">Track 1</option>
+                                <option value="2Audio.mp3">Track 2</option>
+                                <option value="3Audio.mp3">Track 3</option>
                             </select>
                             <button id="music-pause" onclick="pauseMusic()">
                                 <i class="fas fa-pause mr-1"></i> Pause Music
@@ -1113,7 +1235,8 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
                         </div>
                         <div class="volume-control mt-2">
                             <i class="fas fa-volume-down text-gray-400"></i>
-                            <input type="range" id="volume-control" min="0" max="2" step="0.01" value="1" onchange="adjustVolume()">
+                            <input type="range" id="volume-control" min="0" max="2" step="0.01" value="2"
+                                onchange="adjustVolume()">
                             <i class="fas fa-volume-up text-gray-400"></i>
                         </div>
                     </div>
@@ -1121,19 +1244,20 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center">
                 <p class="text-gray-400 text-sm">
-                    © 2025 CyberLibrary. All rights reserved. Built with <i class="fas fa-heart text-red-500"></i> for the hacking community.
+                    © 2025 CyberLibrary. All rights reserved.by Shubham.sh <i class="fas fa-heart text-red-500"></i> for
+                    the hacking community.
                 </p>
             </div>
         </div>
     </footer>
 
-    <audio id="background-audio" autoplay loop>
-        <source src="audio/background-music1.mp3" type="audio/mpeg">
-        <source src="audio/background-music2.mp3" type="audio/mpeg">
-        <source src="audio/background-music3.mp3" type="audio/mpeg">
+    <audio id="background-audio" autoplay>
+        <source src="1.mp3" type="audio/mpeg">
+        <source src="2Audio.mp3" type="audio/mpeg">
+        <source src="3Audio.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
         particlesJS('particles-js', {
@@ -1240,41 +1364,146 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
         });
 
         const pdfList = [
-            { title: "001_Certified_Ethical_Hacker_CEH_Linux_Android", path: "/pdfs/001_Certified_Ethical_Hacker_CEH_Linux_Academys_Prep_Course_PDF (1).pdf", size: "4.5MB", rating: "4.8", category: "Ethical Hacking", cover: "" },
-            { title: "Pentest_report", path: "/pdfs/2 -JBOSP - Level 5 - Offensive Security Major (OSM)-stamped (1).pdf", size: "4.2MB", rating: "4.5", category: "Penetration Testing", cover: "" },
-            { title: "AI_and_Cyber_Intro", path: "/pdfs/ai_and_cyber_intro.pdf", size: "3.0MB", rating: "4.6", category: "AI_and_Cyber", cover: "" },
-            { title: "API_Security_Guide", path: "/pdfs/api_security_guide.pdf", size: "3.5MB", rating: "4.7", category: "API_Security", cover: "" },
-            { title: "Cloud_Security_Basics", path: "/pdfs/cloud_security_basics.pdf", size: "3.8MB", rating: "4.5", category: "Cloud_Security", cover: "" },
-            { title: "Forensics_101", path: "/pdfs/forensics_101.pdf", size: "4.0MB", rating: "4.8", category: "Forensics", cover: "" },
-            { title: "General_Cybersecurity_Principles", path: "/pdfs/general_cybersecurity_principles.pdf", size: "3.2MB", rating: "4.4", category: "General_Cybersecurity", cover: "" },
-            { title: "Linux_Security_Essentials", path: "/pdfs/linux_security_essentials.pdf", size: "3.9MB", rating: "4.6", category: "Linux_Security", cover: "" },
-            { title: "Malware_Analysis_Guide", path: "/pdfs/malware_analysis_guide.pdf", size: "5.1MB", rating: "4.9", category: "Malware_Analysis", cover: "" },
-            { title: "Network_Security_Fundamentals", path: "/pdfs/network_security_fundamentals.pdf", size: "4.3MB", rating: "4.7", category: "Network_Security", cover: "" },
-            { title: "OSINT_Techniques", path: "/pdfs/osint_techniques.pdf", size: "3.7MB", rating: "4.5", category: "OSINT", cover: "" },
-            { title: "Others_Misc", path: "/pdfs/others_misc.pdf", size: "3.1MB", rating: "4.3", category: "Others", cover: "" },
-            { title: "Practice_Tests_CEH", path: "/pdfs/practice_tests_ceh.pdf", size: "4.6MB", rating: "4.8", category: "Practice_Tests", cover: "" },
-            { title: "Python_Hacking_Scripts", path: "/pdfs/python_hacking_scripts.pdf", size: "3.4MB", rating: "4.6", category: "Python_Hacking", cover: "" },
-            { title: "Tools_Manuals_Nmap", path: "/pdfs/tools_manuals_nmap.pdf", size: "4.1MB", rating: "4.7", category: "Tools_Manuals", cover: "" },
-            { title: "Web_Security_Essentials", path: "/pdfs/web_security_essentials.pdf", size: "3.9MB", rating: "4.5", category: "Web_Security", cover: "" }
+            { title: "Artificial Intelligence", path: "/PDF$/AI_and_Cyber/Artificial Intelligence.pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "Threat Hunting in the Cloud", path: "/PDF$/AI_and_Cyber/Chris Peiris, Binil Pillai, Abbas Kudrati Threa....pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "Container Attacks", path: "/PDF$/AI_and_Cyber/Container Attacks.Pdf.pdf.pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "Gai Mem Analysis", path: "/PDF$/AI_and_Cyber/Gai Mem Analysis.pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "Samurai", path: "/PDF$/AI_and_Cyber/Samurai.pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "SDN and DCN Cloud Fabric", path: "/PDF$/Cloud_Security/Sdn Ac Dcn Cloud Fabric Network Vxlan Overlay I....pdf", size: "5.2MB", rating: "4", category: "Cloud_Security", cover: "" }, { title: "Gai Mem Analysis", path: "/PDF$/AI_and_Cyber/Gai Mem Analysis.pdf", size: "5.2MB", rating: "4", category: "AI_and_Cyber", cover: "" },
+            { title: "Practical Dfi", path: "/PDF$/Forensics/Practical Dfi.pdf", size: "5.2MB", rating: "4", category: "Practical Dfi", cover: "" },
+            { title: "Ai Cyber", path: "/PDF$/General_Cybersecurity/Ai Cyber.pdf", size: "5.2MB", rating: "4", category: "General_Cybersecurity", cover: "" },
+            { title: "CEH Sum", path: "/PDF$/General_Cybersecurity/Ceh Sum.pdf", size: "5.2MB", rating: "4", category: "General_Cybersecurity", cover: "" },
+            { title: "ChatGPT for Cybersecurity Cookbook", path: "/PDF$/General_Cybersecurity/Chatgpt For Cyber Cookbook Clint Bodungen.pdf", size: "5.2MB", rating: "4", category: "All catergrois", cover: "" },
+          { title: "Chat-Gpt", path: "/PDF$/General_Cybersecurity/Chatgpt For Cyber Cookbook Clint Bodungen.pdf", size: "5.2MB", rating: "4", category: "General_Cybersecurity", cover: "" },
+         { title: "CISSP Concepts Guide", path: "/PDF$/General_Cybersecurity/Cissp Concepts Guide.pdf", size: "5.2MB", rating: "4", category: "General_Cybersecurity", cover: "" },
+         { title: "CISSP-Guide-INFO", path: "/PDF$/General_Cybersecurity/Cissp® Certified Information Systems Profession....pdf", size: "5.2MB", rating: "4", category: "General_Cybersecurity", cover: "" },
+
+
+
+
         ];
 
         const tableOfContentsMap = {
-            "001_Certified_Ethical_Hacker_CEH_Linux_Android": [
-                "1. Introduction to Ethical Hacking",
-                "2. Linux Security Basics",
-                "3. Android Vulnerabilities",
-                "4. Exploiting Linux Systems",
-                "5. Android Penetration Testing",
-                "6. Defense Mechanisms"
+            "Certified  Hacking Android": [
+                "1. Introduction to Android Hacking",
+                "2. Android System Architecture",
+                "3. Common Android Vulnerabilities",
+                "4. Tools for Android Penetration Testing",
+                "5. Exploiting Android Devices",
+                "6. Securing Android Systems",
             ],
-            "Pentest_report": [
+            "Artificial Intelligence": [
                 "1. Pentest Overview",
                 "2. Vulnerability Findings",
                 "3. Beyblade Details",
                 "4. Mitigation Steps",
                 "5. Security Recommendations",
                 "6. Conclusion"
-            ]
+            ],
+            "Threat Hunting in the Cloud": [
+                "1. Introduction to Threat Hunting",
+                "2. Cloud Security Fundamentals",
+                "3. MITRE ATT&CK Framework Overview",
+                "4. Building a Cyber Fusion Center",
+                "5. Threat Hunting in AWS and Azure",
+                "6. Future of Threat Hunting"
+            ],
+            "Container Attacks": [
+                "1. Introduction to Container Security",
+                "2. Container Threat Model",
+                "3. Linux System Calls and Capabilities",
+                "4. Control Groups in Containers",
+                "5. Breaking Container Isolation",
+                "6. Container Network Security"
+            ],
+            "Gai Mem Analysis": [
+                "1. Introduction to Memes and GAI",
+                "2. Semiotic Analysis of Memes",
+                "3. Role of GAI in Meme Analysis",
+                "4. Cultural Discourse through Memes",
+                "5. Ethical Implications of GAI",
+                "6. Future Trends in Meme Studies"
+            ],
+            "Samurai": [
+                "1. Introduction to Samurai History",
+                "2. The Rise of the Warrior Class",
+                "3. Samurai Arms and Armour",
+                "4. The Code of Bushido",
+                "5. Samurai Warfare Tactics",
+                "6. The Decline of the Samurai"
+            ],
+            "Azure DevSecOps": [
+                "1. Introduction to DevSecOps",
+                "2. Azure DevOps Security Basics",
+                "3. Shift-Left Security Practices",
+                "4. Integrating Security in CI/CD Pipelines",
+                "5. Monitoring and Threat Detection",
+                "6. Best Practices for Azure Security"
+            ],
+            "SDN and DCN Cloud Fabric": [
+                "1. Introduction to SDN and DCN",
+                "2. Cloud Fabric Network Basics",
+                "3. VXLAN Overlay Technology",
+                "4. Network Virtualization Concepts",
+                "5. Security in SDN Environments",
+                "6. Future of Cloud Fabric Networks"
+            ],
+            "Practical DFI": [
+                "1. Introduction to Digital Forensics",
+                "2. Setting Up a DFI Lab",
+                "3. Evidence Acquisition Techniques",
+                "4. Analyzing File Systems",
+                "5. Memory Forensics Basics",
+                "6. Reporting and Legal Considerations"
+            ],
+            "AI Cyber": [
+                "1. Introduction to AI in Cybersecurity",
+                "2. AI-Powered Threat Detection",
+                "3. Machine Learning for Vulnerability Analysis",
+                "4. AI in Phishing Prevention",
+                "5. Ethical Concerns in AI Security",
+                "6. Future of AI in Cyber Defense"
+            ],
+            "CEH Sum": [
+                "1. Introduction to Ethical Hacking",
+                "2. Footprinting and Reconnaissance",
+                "3. Scanning Networks",
+                "4. System Hacking Techniques",
+                "5. Social Engineering Attacks",
+                "6. Securing Systems and Networks"
+            ],
+            "ChatGPT for Cybersecurity Cookbook": [
+    "1. Getting Started: ChatGPT, the OpenAI API, and Prompt Engineering",
+    "2. Automating Penetration Testing with ChatGPT",
+    "3. Vulnerability Assessments with AI-Driven Techniques",
+    "4. Threat Detection and Analysis",
+    "5. Attack Vector Automation and Simulation",
+    "6. GPT-Assisted Code Analysis for Secure Development",
+    "7. Risk Assessment and Management",
+    "8. Open Source Intelligence (OSINT) and Red Teaming",
+    "9. Advanced AI Techniques: Local LLMs and Fine-Tuning",
+    "10. Building Custom GPTs for Cybersecurity"
+],
+"CISSP Concepts Guide": [
+    "1. Introduction to CISSP Certification",
+    "2. Security and Risk Management",
+    "3. Asset Security",
+    "4. Security Architecture and Engineering",
+    "5. Communication and Network Security",
+    "6. Identity and Access Management (IAM)",
+    "7. Security Assessment and Testing",
+    "8. Security Operations",
+    "9. Software Development Security",
+    "10. CISSP Exam Strategies and Tips",
+    "11. Glossary of Key Terms",
+    "12. Practice Questions and Resources"
+],
+
+
+
+
+
+
         };
 
         const categoriesList = document.getElementById('categories-list');
@@ -1344,12 +1573,12 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
         function updateTerminal() {
             const terminalBody = document.getElementById('terminal-body');
             terminalBody.innerHTML = `<div class="mb-2"><span class="command">user@cyberlibrary:~$</span> search --type=pdf --category="penetration testing"</div>`;
-            
+
             setTimeout(() => {
                 terminalBody.innerHTML += `<div class="mb-2 response">Searching database... <span class="loading-dots"></span></div>`;
                 setTimeout(() => {
                     const filteredPdfs = pdfList.filter(pdf => pdf.category.toLowerCase() === "penetration testing");
-                    const pdfLines = filteredPdfs.map((pdf, index) => 
+                    const pdfLines = filteredPdfs.map((pdf, index) =>
                         `${index + 1}. ${pdf.title}.pdf (${pdf.size}) ★★★★☆`
                     ).join('<br>');
                     terminalBody.innerHTML += `<div class="mb-2 response">${pdfLines}</div>`;
@@ -1424,7 +1653,7 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         const viewport = page.getViewport({ scale: scale, rotation: rotation });
-                        
+
                         canvas.height = viewport.height * window.devicePixelRatio;
                         canvas.width = viewport.width * window.devicePixelRatio;
                         canvas.style.width = `${viewport.width}px`;
@@ -1706,7 +1935,7 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
                 this.size = Math.random() * 3 + 1;
                 this.speedX = Math.random() * 2 - 1;
                 this.speedY = Math.random() * 2 - 1;
-                this.life = 50;
+                this.life = 60;
             }
 
             update() {
@@ -1716,7 +1945,7 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
             }
 
             draw() {
-                ctx.fillStyle = `rgba(0, 255, 136, ${this.life / 50})`;
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.7)';
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -1733,75 +1962,106 @@ Now, anyone can browse, read, and learn from these valuable resources anytime. W
             }
         }
 
-        function animate() {
+        function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             handleParticles();
-            requestAnimationFrame(animate);
+            requestAnimationFrame(animateParticles);
         }
 
-       animate();
+        animateParticles();
 
         document.addEventListener('mousemove', (e) => {
-            isMouseMoving = true;
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            cursor.style.left = `${x}px`;
+            cursor.style.top = `${y}px`;
 
-            if (particlesArray.length < 100) {
+            if (isMouseMoving) {
                 for (let i = 0; i < 2; i++) {
-                    particlesArray.push(new Particle(e.clientX, e.clientY));
+                    particlesArray.push(new Particle(x, y));
                 }
             }
-        });
 
-        document.addEventListener('mouseover', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            isMouseMoving = true;
+
+            const hoverElements = document.querySelectorAll('a, button, .card-hover, .pdf-thumbnail');
+            let isHovering = false;
+            hoverElements.forEach(element => {
+                const elemRect = element.getBoundingClientRect();
+                if (e.clientX >= elemRect.left && e.clientX <= elemRect.right &&
+                    e.clientY >= elemRect.top && e.clientY <= elemRect.bottom) {
+                    isHovering = true;
+                }
+            });
+
+            if (isHovering) {
                 cursor.classList.add('hover');
-            }
-        });
-
-        document.addEventListener('mouseout', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            } else {
                 cursor.classList.remove('hover');
             }
         });
 
-        let mouseTimeout;
-        document.addEventListener('mousemove', () => {
-            clearTimeout(mouseTimeout);
-            mouseTimeout = setTimeout(() => {
-                isMouseMoving = false;
-                cursor.style.opacity = '0';
-            }, 1000);
-            cursor.style.opacity = '1';
+        document.addEventListener('mouseout', () => {
+            isMouseMoving = false;
         });
 
-        const audio = document.getElementById('background-audio');
-        audio.volume = 1.0; // Default volume (100%)
+        let tracks = [
+            { src: "1.mp3", name: "Track 2" },
+            { src: "2Audio.mp3", name: "Track 2" },
+            { src: "3Audio.mp3", name: "Track 3" }
+        ];
+
+        let currentTrackIndex = 0;
+        const audioElement = document.getElementById('background-audio');
+        const musicSelect = document.getElementById('music-select');
+        const pauseButton = document.getElementById('music-pause');
+        let isPaused = false;
+
+        function updateAudioSource() {
+            audioElement.src = tracks[currentTrackIndex].src;
+            audioElement.load();
+            if (!isPaused) {
+                audioElement.play().catch(err => console.error("Playback error:", err));
+            }
+            musicSelect.value = tracks[currentTrackIndex].src;
+        }
+
+        audioElement.addEventListener('ended', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            updateAudioSource();
+        });
 
         function changeMusic() {
-            const select = document.getElementById('music-select');
-            const selectedTrack = select.value;
-            audio.src = selectedTrack;
-            audio.play().catch(err => {
-                console.error('Error playing audio:', err);
-            });
+            const selectedTrack = musicSelect.value;
+            currentTrackIndex = tracks.findIndex(track => track.src === selectedTrack);
+            isPaused = false;
+            pauseButton.innerHTML = '<i class="fas fa-pause mr-1"></i> Pause Music';
+            updateAudioSource();
         }
 
         function pauseMusic() {
-            audio.pause();
-            document.getElementById('music-pause').classList.add('active');
+            if (isPaused) {
+                audioElement.play().catch(err => console.error("Playback error:", err));
+                pauseButton.innerHTML = '<i class="fas fa-pause mr-1"></i> Pause Music';
+            } else {
+                audioElement.pause();
+                pauseButton.innerHTML = '<i class="fas fa-play mr-1"></i> Play Music';
+            }
+            isPaused = !isPaused;
         }
 
         function adjustVolume() {
             const volumeControl = document.getElementById('volume-control');
-            audio.volume = volumeControl.value / 2; // Scale 0-2 to 0-1 for audio volume
+            audioElement.volume = volumeControl.value / 2;
         }
 
+        audioElement.volume = 1.0;
+
         window.addEventListener('load', () => {
-            audio.play().catch(err => {
-                console.error('Error auto-playing audio:', err);
-            });
+            musicSelect.value = tracks[currentTrackIndex].src;
         });
     </script>
 </body>
+
 </html>
